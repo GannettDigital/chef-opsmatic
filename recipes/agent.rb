@@ -31,7 +31,7 @@ end
 # install the opsmatic agent
 package opsmatic_package do
   action node['opsmatic']['agent_action']
-  version node['opsmatic']['agent_version']
+  version node['opsmatic']['agent_version'] unless node['opsmatic']['agent_version'].nil?
 end
 
 # perform initial configuration
@@ -43,11 +43,16 @@ end
 # Config File for Opsmatic Agent
 # https://opsmatic.com/app/docs/agent-configuration
 
+ingest_http = node['opsmatic']['ingest_http'] || nil
+
 template '/etc/opsmatic-agent.conf' do
   source 'opsmatic-agent.conf.erb'
   owner 'root'
   group 'root'
   mode '00644'
+  variables(
+    'ingest_http' => ingest_http
+  )
   notifies :restart, 'service[opsmatic-agent]', :delayed
 end
 
